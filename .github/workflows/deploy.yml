@@ -20,6 +20,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # public/uarch-map is a submodule of the private ihagedo/uarch-map (its site branch);
+          # UARCH_MAP_TOKEN is a fine-grained token with read access to that repo
+          submodules: true
+          token: ${{ secrets.UARCH_MAP_TOKEN }}
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -35,6 +40,8 @@ jobs:
         run: pnpm install
       - name: Build with Astro
         run: pnpm astro build
+      - name: Drop the submodule's .git pointer from the output
+        run: rm -f dist/uarch-map/.git
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
