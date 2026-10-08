@@ -1,4 +1,4 @@
 [submodule "public/uarch-map"]
-	path = public/uarch-map
+	path = vendor/uarch-map
 	url = https://github.com/ihagedo/uarch-map.git
-	branch = site
+	branch = main

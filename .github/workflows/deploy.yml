@@ -21,10 +21,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # public/uarch-map is a submodule of the private ihagedo/uarch-map (its site branch);
-          # UARCH_MAP_TOKEN is a fine-grained token with read access to that repo
+          # vendor/uarch-map is a submodule of ihagedo/uarch-map (main); its map page is built below
           submodules: true
-          token: ${{ secrets.UARCH_MAP_TOKEN }}
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -40,8 +38,16 @@ jobs:
         run: pnpm install
       - name: Build with Astro
         run: pnpm astro build
-      - name: Drop the submodule's .git pointer from the output
-        run: rm -f dist/uarch-map/.git
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build the Firestorm map into /uarch-map/
+        run: |
+          pip install pyyaml
+          python vendor/uarch-map/site/build.py firestorm
+          mkdir -p dist/uarch-map
+          cp vendor/uarch-map/build/site/index.html dist/uarch-map/index.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
