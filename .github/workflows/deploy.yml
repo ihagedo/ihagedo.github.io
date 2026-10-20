@@ -51,9 +51,10 @@ jobs:
           python vendor/uarch-map/site/build.py firestorm
           mkdir -p dist/uarch-map
           cp vendor/uarch-map/build/site/index.html dist/uarch-map/index.html
-      # unlisted HKN Theta site from ihagedo/hkn-theta-website (main); a failure here skips it and the rest still deploys
+      # unlisted HKN sites, each from the main of its private repo (needs the HKN_REPO_TOKEN secret);
+      # a failure here skips that site and the rest still deploys
       - name: Check out the HKN Theta site
-        id: hkn
+        id: hkn_theta
         continue-on-error: true
         uses: actions/checkout@v4
         with:
@@ -61,13 +62,22 @@ jobs:
           ref: main
           path: vendor/hkn-theta-website
           token: ${{ secrets.HKN_REPO_TOKEN || github.token }}
-      - name: Setup Node for the HKN Theta site
-        if: steps.hkn.outcome == 'success'
+      - name: Check out the HKN Beta dev copy
+        id: hkn_beta
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          repository: ihagedo/hkn-beta-website
+          ref: main
+          path: vendor/hkn-beta-website
+          token: ${{ secrets.HKN_REPO_TOKEN || github.token }}
+      - name: Setup Node for the HKN sites
+        if: steps.hkn_theta.outcome == 'success' || steps.hkn_beta.outcome == 'success'
         uses: actions/setup-node@v4
         with:
           node-version: "24"
       - name: Build the HKN Theta site into /hkn-theta-f5f79b/
-        if: steps.hkn.outcome == 'success'
+        if: steps.hkn_theta.outcome == 'success'
         continue-on-error: true
         working-directory: vendor/hkn-theta-website
         env:
@@ -78,6 +88,18 @@ jobs:
           npm ci
           npm run generate
           cp -r .output/public ../../dist/hkn-theta-f5f79b
+      - name: Build the HKN Beta dev copy into /hkn-beta-40901e/
+        if: steps.hkn_beta.outcome == 'success'
+        continue-on-error: true
+        working-directory: vendor/hkn-beta-website
+        env:
+          NUXT_APP_BASE_URL: /hkn-beta-40901e/
+          NUXT_TELEMETRY_DISABLED: "1"
+        run: |
+          npm install --no-audit --no-fund
+          npm run generate
+          cp -r .output/public ../../dist/hkn-beta-40901e
+          python ../../scripts/rebase_static.py public ../../dist/hkn-beta-40901e /hkn-beta-40901e/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
