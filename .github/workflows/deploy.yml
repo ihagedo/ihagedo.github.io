@@ -4,6 +4,9 @@ on:
   push:
     branches: ["main"]
   workflow_dispatch:
+  # sent by ihagedo/hkn-theta-website on a push to its main
+  repository_dispatch:
+    types: [hkn-website]
 
 permissions:
   contents: read
@@ -48,6 +51,33 @@ jobs:
           python vendor/uarch-map/site/build.py firestorm
           mkdir -p dist/uarch-map
           cp vendor/uarch-map/build/site/index.html dist/uarch-map/index.html
+      # unlisted HKN Theta site from ihagedo/hkn-theta-website (main); a failure here skips it and the rest still deploys
+      - name: Check out the HKN Theta site
+        id: hkn
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          repository: ihagedo/hkn-theta-website
+          ref: main
+          path: vendor/hkn-theta-website
+          token: ${{ secrets.HKN_REPO_TOKEN || github.token }}
+      - name: Setup Node for the HKN Theta site
+        if: steps.hkn.outcome == 'success'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Build the HKN Theta site into /hkn-theta-f5f79b/
+        if: steps.hkn.outcome == 'success'
+        continue-on-error: true
+        working-directory: vendor/hkn-theta-website
+        env:
+          NUXT_APP_BASE_URL: /hkn-theta-f5f79b/
+          HKN_UNLISTED: "1"
+          NUXT_TELEMETRY_DISABLED: "1"
+        run: |
+          npm ci
+          npm run generate
+          cp -r .output/public ../../dist/hkn-theta-f5f79b
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
