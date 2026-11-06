@@ -24,8 +24,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # vendor/uarch-map is a submodule of ihagedo/uarch-map (main); its map page is built below
-          submodules: true
+          # vendor/uarch-map is a submodule of ihagedo/uarch-map (main), and its site/atlas one of
+          # ihagedo/firestorm-diagrams; the map page is built below
+          submodules: recursive
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
