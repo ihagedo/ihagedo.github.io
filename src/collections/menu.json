@@ -12,6 +12,10 @@
 		"url": "/works"
 	},
 	{
+		"name": "Tools",
+		"url": "/pbit/"
+	},
+	{
 		"name": "About",
 		"url": "/about"
 	}

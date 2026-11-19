@@ -1,5 +1,13 @@
 [
 	{
+		"name": "p-bit tools",
+		"description": "Run the p-bit samplers, Markov chains and an FPGA p-computer from the browser",
+		"tags": ["Probabilistic computing", "FPGA", "Python"],
+		"image": "/assets/works/pbit.jpg",
+		"url": "/pbit/",
+		"isShow": true
+	},
+	{
 		"name": "RISC-V SoC Tape-Out",
 		"description": "Hardware redaction techniques applied to RISC-V SoC in Cadence (TSMC180)",
 		"tags": ["Chip Design", "RISC-V", "Cadence"],
